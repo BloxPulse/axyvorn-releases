@@ -1,0 +1,82 @@
+name: Annonce Discord des releases
+
+on:
+  release:
+    types: [published]          # se déclenche à la publication d'une release
+  schedule:
+    - cron: "*/30 * * * *"      # filet de sécurité si l'événement est manqué
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "send = publier | dry-run = aperçu sans envoi | seed = mémoriser l'existant"
+        type: choice
+        options: [dry-run, send, seed]
+        default: dry-run
+      tag:
+        description: "Tag ciblé (vide = dernière release publiée)"
+        type: string
+        default: ""
+      channel:
+        description: "prod = 🆕・mises-a-jour | test = salon de test"
+        type: choice
+        options: [test, prod]
+        default: test
+      force:
+        description: "Ignorer l'anti-doublon (à utiliser en connaissance de cause)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write               # nécessaire pour committer le fichier anti-doublon
+
+concurrency:
+  group: annonce-discord        # deux annonces ne peuvent jamais partir en parallèle
+  cancel-in-progress: false
+
+jobs:
+  annonce:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Annonce de la release
+        id: annonce
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          DISCORD_WEBHOOK_TEST_URL: ${{ secrets.DISCORD_WEBHOOK_TEST_URL }}
+          ANNOUNCE_MODE: ${{ github.event_name == 'workflow_dispatch' && inputs.mode || 'send' }}
+          ANNOUNCE_CHANNEL: ${{ github.event_name == 'workflow_dispatch' && inputs.channel || 'prod' }}
+          ANNOUNCE_TAG: ${{ inputs.tag }}
+          ANNOUNCE_FORCE: ${{ inputs.force }}
+          ANNOUNCE_PRERELEASES: "false"     # "true" pour annoncer aussi les préversions
+        run: python .github/scripts/announce_release.py
+
+      - name: Aperçu de l'embed (artifact)
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: apercu-discord
+          path: discord-preview.json
+          if-no-files-found: ignore
+
+      - name: Mémoriser l'annonce (anti-doublon)
+        if: steps.annonce.outputs.sent == 'true' || (github.event_name == 'workflow_dispatch' && inputs.mode == 'seed')
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .github/discord-announced.json
+          if git diff --cached --quiet; then echo "État inchangé."; exit 0; fi
+          git commit -m "chore(annonces): ${{ steps.annonce.outputs.tag || 'seed' }} [skip ci]"
+          for i in 1 2 3; do
+            git pull --rebase origin main && git push origin HEAD:main && break
+            echo "Nouvelle tentative de push ($i)"; sleep 5
+          done
