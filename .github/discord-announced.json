@@ -1,0 +1,35 @@
+{
+  "announced": {
+    "454207035": {
+      "announced_at": "2026-11-25T02:52:38Z",
+      "body_sha256": "945624e9a599172e60047ca1d802f3427e3ed110714ba0551b7307a27eb0c162",
+      "channel_id": null,
+      "message_id": null,
+      "mode": "seed",
+      "published_at": "2026-11-22T04:44:18Z",
+      "tag": "v0.1.0",
+      "version": "V0.1.0"
+    },
+    "454680519": {
+      "announced_at": "2026-11-25T02:52:38Z",
+      "body_sha256": "50b1d565a2e16c45fe942ffaf7278e65619555135995db0e09a9659bca804802",
+      "channel_id": null,
+      "message_id": null,
+      "mode": "seed",
+      "published_at": "2026-11-22T19:08:14Z",
+      "tag": "v0.1.1",
+      "version": "V0.1.1"
+    },
+    "456050664": {
+      "announced_at": "2026-11-25T02:52:38Z",
+      "body_sha256": "f0f71cf56568313678afb079602f91f10ec3e1f371070bcba05bf76b875f1f9f",
+      "channel_id": null,
+      "message_id": null,
+      "mode": "seed",
+      "published_at": "2026-11-23T22:04:00Z",
+      "tag": "v0.1.2",
+      "version": "V0.1.2"
+    }
+  },
+  "schema": 1
+}
