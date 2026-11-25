@@ -2,9 +2,9 @@ name: Annonce Discord des releases
 
 on:
   release:
-    types: [published]          # se déclenche à la publication d'une release
+    types: [published]
   schedule:
-    - cron: "*/30 * * * *"      # filet de sécurité si l'événement est manqué
+    - cron: "*/30 * * * *"
   workflow_dispatch:
     inputs:
       mode:
@@ -27,10 +27,10 @@ on:
         default: false
 
 permissions:
-  contents: write               # nécessaire pour committer le fichier anti-doublon
+  contents: write
 
 concurrency:
-  group: annonce-discord        # deux annonces ne peuvent jamais partir en parallèle
+  group: annonce-discord
   cancel-in-progress: false
 
 jobs:
@@ -57,7 +57,7 @@ jobs:
           ANNOUNCE_CHANNEL: ${{ github.event_name == 'workflow_dispatch' && inputs.channel || 'prod' }}
           ANNOUNCE_TAG: ${{ inputs.tag }}
           ANNOUNCE_FORCE: ${{ inputs.force }}
-          ANNOUNCE_PRERELEASES: "false"     # "true" pour annoncer aussi les préversions
+          ANNOUNCE_PRERELEASES: "false"
         run: python .github/scripts/announce_release.py
 
       - name: Aperçu de l'embed (artifact)
