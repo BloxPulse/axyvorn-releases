@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""Annonce automatique des releases GitHub d'Axyvorn sur Discord (stdlib only)."""
 from __future__ import annotations
 import argparse, hashlib, json, os, re, sys, time, unicodedata
 import urllib.error, urllib.parse, urllib.request
@@ -554,4 +556,3 @@ if __name__ == "__main__":
         sys.exit(1)
     except KeyboardInterrupt:
         sys.exit(130)
-```[cite: 1]
